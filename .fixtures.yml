@@ -1,0 +1,16 @@
+fixtures:
+  repositories:
+    stdlib:
+      repo: "https://github.com/Adaptavist/puppet-stdlib"
+    puppi:
+      repo: "https://github.com/Adaptavist/puppet-puppi"
+    iptables:
+      repo: "https://github.com/Adaptavist/puppet-iptables"
+    monitor:
+      repo: "https://github.com/Adaptavist/puppet-monitor"
+    concat:
+      repo: "https://github.com/Adaptavist/puppet-concat"
+    fail2ban:
+      repo: "https://github.com/Adaptavist/puppet-fail2ban"
+  symlinks:
+    fail2ban_config: "#{source_dir}"
