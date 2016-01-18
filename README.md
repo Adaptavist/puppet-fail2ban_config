@@ -1,5 +1,6 @@
 
 # fail2ban_config Module
+[![Build Status](https://travis-ci.org/Adaptavist/puppet-fail2ban_config.svg?branch=master)](https://travis-ci.org/Adaptavist/puppet-fail2ban_config)
 
 ## Overview
 
