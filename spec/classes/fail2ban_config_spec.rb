@@ -17,14 +17,23 @@ no_jails = false
 custom_jail = {
     'vsftpd' => {
         'enable'   => 'true',
-        'filter'   => 'vsftpd',
+        'filter'   => 'vsftpd-special',
         'action'   => 'iptables[name=vsftpd, port="20, 21, 10204, 10205"]',
         'logpath'  => '/var/log/secure',
         'maxretry' => '5',
     }
 }
+
+no_filter = false
+custom_filter = {
+    'vsftpd-special' => {
+          'filterenable' => 'true',
+          'filtername'   => 'vsftpd-special',
+          'filtersource' => "puppet:///modules/fail2ban_config/vsftpd-special.conf",
+      }
+}
     
-  context "Should install fail2ban with default jail on RedHat" do
+  context "Should install fail2ban with default jail and filter on RedHat" do
     let(:facts) {
       { :osfamily => 'RedHat',
         :operatingsystem => 'RedHat',
@@ -45,7 +54,8 @@ custom_jail = {
         :backend => backend,
         :protocol => protocol,
         :chain => chain,
-        :mailto => mailto
+        :mailto => mailto,
+        :filters => no_filter
       }
     }
     
@@ -65,15 +75,20 @@ custom_jail = {
 
       should contain_fail2ban__jail('ssh-iptables').with(
           'enable'   => 'true',
-          'filter'   => 'sshd',
+          'filter'   => 'sshd-pam',
           'action'   => 'iptables[name=SSH, port=ssh, protocol=tcp]',
           'logpath'  => '/var/log/secure',
           'maxretry' => '3',
       )
+      should contain_fail2ban__filter('ssh-pam_auth').with(
+          'filterenable' => 'true',
+          'filtername'   => 'sshd-pam',
+          'filtersource' => "puppet:///modules/fail2ban_config/sshd-pam.conf",
+      )
     end
   end  
 
-  context "Should install fail2ban with custom jail and no default jail on RedHat" do
+  context "Should install fail2ban with custom jail/filter and no default jail/filter on RedHat" do
     let(:facts) {
       { :osfamily => 'RedHat',
         :operatingsystem => 'RedHat',
@@ -94,7 +109,8 @@ custom_jail = {
         :backend => backend,
         :protocol => protocol,
         :chain => chain,
-        :mailto => mailto
+        :mailto => mailto,
+        :filters => custom_filter
       }
     }
     
@@ -116,16 +132,25 @@ custom_jail = {
 
       should contain_fail2ban__jail('vsftpd').with(
           'enable'   => 'true',
-          'filter'   => 'vsftpd',
+          'filter'   => 'vsftpd-special',
           'action'   => 'iptables[name=vsftpd, port="20, 21, 10204, 10205"]',
           'logpath'  => '/var/log/secure',
           'maxretry' => '5',
       )
 
-    end
-  end  
+      should_not contain_fail2ban__filter('ssh-pam_auth')
 
-  context "Should install fail2ban with no default jail on Debian" do
+      should contain_fail2ban__filter('vsftpd-special').with(
+          'filterenable' => 'true',
+          'filtername'   => 'vsftpd-special',
+          'filtersource' => "puppet:///modules/fail2ban_config/vsftpd-special.conf",
+      )
+
+    end
+  end 
+
+
+  context "Should install fail2ban with no default jail or filters on Debian" do
     let(:facts) {
       { :osfamily => 'Debian',
         :operatingsystem => 'Debian',
@@ -165,6 +190,8 @@ custom_jail = {
       )
 
       should_not contain_fail2ban__jail('ssh-iptables')
+      should_not contain_fail2ban__filter('ssh-pam_auth')
+
     end
   end
 
