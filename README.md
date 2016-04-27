@@ -50,6 +50,10 @@ The iptables chain where jumps would need to be added, defaults to **INPUT**
 
 A hash of jails to create, if set to false no jails wil be defined for Debian based systems however a basic SSH jail will be defined for redHat based systems, defaults to **false** 
 
+`fail2ban_config::filters:`
+
+A hash of filters to create, if set to false no jails wil be defined for Debian based systems however a 'ssh-pam' filter will be defined for redHat based systems, this is a copy of the sshd filter but configured to match any pam module not just pam_unix, defaults to **false**
+
 ## Example Hiera Usage:
  
     fail2ban_config::jails: false

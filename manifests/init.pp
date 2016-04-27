@@ -11,6 +11,7 @@ class fail2ban_config(
     $protocol = 'tcp',
     $chain    = 'INPUT',
     $mailto   = '',
+    $filters  = false,
     ) {
 
     # if a jail configuration has been provided use it
@@ -23,7 +24,7 @@ class fail2ban_config(
                 $real_jails = {
                     'ssh-iptables' => {
                         enable   => 'true',
-                        filter   => 'sshd',
+                        filter   => 'sshd-pam',
                         action   => 'iptables[name=SSH, port=ssh, protocol=tcp]',
                         logpath  => '/var/log/secure',
                         maxretry => '3',
@@ -33,6 +34,30 @@ class fail2ban_config(
             # if not and its a Debian based system then do nothing as by default a SSH jail is configured out-of-the box
             Debian: {
                 $real_jails = undef
+            }
+            default: {
+                fail("fail2ban_config - Unsupported Operating System family: ${::osfamily}")
+            }
+        }
+    }
+    # if a filters configuration has been provided use it
+    if ($filters != false and $filters != 'false') {
+        $real_filters = $filters
+    } else {
+        case $::osfamily {
+            # if not and this is a RedHat based system define a SSH filter that matches any pam_auth module
+            RedHat: {
+                $real_filters = {
+                    'ssh-pam_auth' => {
+                        filterenable => 'true',
+                        filtername   => 'sshd-pam',
+                        filtersource => "puppet:///modules/${module_name}/sshd-pam.conf",
+                    }
+                }
+            }
+            # if not and its a Debian based system then do nothing as by default a SSH jail is configured out-of-the box
+            Debian: {
+                $real_filters = undef
             }
             default: {
                 fail("fail2ban_config - Unsupported Operating System family: ${::osfamily}")
@@ -63,7 +88,18 @@ class fail2ban_config(
         ignoreip       => $real_ignoreip,
     }
 
-    # if the is a jail set make sure its in a hash
+    # if there are any filters defined make sure the definition is a hash
+    if ( $real_filters ) {
+        # if the jail config is not a hash 
+        if ( !is_hash($real_filters) ) {
+            fail('fail2ban_config - The filter configuration provided is not a hash')
+        }
+        
+        # create the jail(s)
+        create_resources(fail2ban::filter, $real_filters)
+    }
+
+    # if there are any jails defined make sure the definition is a hash
     if ( $real_jails ) {
         # if the jail config is not a hash 
         if ( !is_hash($real_jails) ) {
@@ -71,7 +107,7 @@ class fail2ban_config(
         }
         
         # create the jail(s)
-        create_resources(fail2ban::jail , $real_jails)
+        create_resources(fail2ban::jail ,$real_jails)
     }
 
 }
