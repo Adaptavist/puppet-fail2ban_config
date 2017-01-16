@@ -20,7 +20,7 @@ class fail2ban_config(
     } else {
         case $::osfamily {
             # if not and this is a RedHat based system define a basic SSH jail
-            RedHat: {
+            'RedHat': {
                 $real_jails = {
                     'ssh-iptables' => {
                         enable   => 'true',
@@ -32,7 +32,7 @@ class fail2ban_config(
                 }
             }
             # if not and its a Debian based system then do nothing as by default a SSH jail is configured out-of-the box
-            Debian: {
+            'Debian': {
                 $real_jails = undef
             }
             default: {
@@ -46,7 +46,7 @@ class fail2ban_config(
     } else {
         case $::osfamily {
             # if not and this is a RedHat based system define a SSH filter that matches any pam_auth module
-            RedHat: {
+            'RedHat': {
                 $real_filters = {
                     'ssh-pam_auth' => {
                         filterenable => 'true',
@@ -56,7 +56,7 @@ class fail2ban_config(
                 }
             }
             # if not and its a Debian based system then do nothing as by default a SSH jail is configured out-of-the box
-            Debian: {
+            'Debian': {
                 $real_filters = undef
             }
             default: {
@@ -94,7 +94,7 @@ class fail2ban_config(
         if ( !is_hash($real_filters) ) {
             fail('fail2ban_config - The filter configuration provided is not a hash')
         }
-        
+
         # create the jail(s)
         create_resources(fail2ban::filter, $real_filters)
     }
@@ -105,7 +105,7 @@ class fail2ban_config(
         if ( !is_hash($real_jails) ) {
             fail('fail2ban_config - The jail configuration provided is not a hash')
         }
-        
+
         # create the jail(s)
         create_resources(fail2ban::jail ,$real_jails)
     }

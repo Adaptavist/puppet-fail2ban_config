@@ -1,5 +1,5 @@
 name 'adaptavist-fail2ban_config'
-version '0.0.6'
+version '1.0.0'
 source 'https://github.com/Adaptavist/puppet-fail2ban_config.git'
 author 'adaptavist'
 summary 'fail2ban configuration Module' 
