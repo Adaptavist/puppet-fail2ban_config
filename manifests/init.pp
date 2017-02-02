@@ -1,17 +1,19 @@
 # = Class: fail2ban_config
 #
 class fail2ban_config(
-    $jails    = false,
-    $bantime  = '600',
-    $findtime = '600',
-    $maxretry = '6',
-    $ignoreip = ['127.0.0.1/8'],
-    $mta      = 'sendmail',
-    $backend  = 'auto',
-    $protocol = 'tcp',
-    $chain    = 'INPUT',
-    $mailto   = '',
-    $filters  = false,
+    $jails      = false,
+    $bantime    = '600',
+    $findtime   = '600',
+    $maxretry   = '6',
+    $ignoreip   = ['127.0.0.1/8'],
+    $mta        = 'sendmail',
+    $backend    = 'auto',
+    $protocol   = 'tcp',
+    $chain      = 'INPUT',
+    $mailto     = '',
+    $filters    = false,
+    $noops      = false,
+    $source_dir = false,
     ) {
 
     # if a jail configuration has been provided use it
@@ -74,6 +76,11 @@ class fail2ban_config(
         $real_ignoreip  = split($ignoreip, ',')
     }
 
+    $real_source_dir = $source_dir ? {
+        'false' => false,
+        false   => false,
+        default => $source_dir
+    }
     # include the fail2ban class to install fail2ban
     class { 'fail2ban':
         jails_config   => 'concat',
@@ -86,6 +93,8 @@ class fail2ban_config(
         jails_protocol => $protocol,
         jails_chain    => $chain,
         ignoreip       => $real_ignoreip,
+        noops          => str2bool($noops),
+        source_dir     => $real_source_dir,
     }
 
     # if there are any filters defined make sure the definition is a hash
