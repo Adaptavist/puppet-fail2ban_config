@@ -16,6 +16,7 @@ class fail2ban_config(
     $source_dir       = false,
     $source_dir_owner = 'root',
     $source_dir_group = 'root',
+    $socket_dir       = '/var/run/fail2ban',
     ) {
 
     # if a jail configuration has been provided use it
@@ -92,6 +93,12 @@ class fail2ban_config(
         }
     }
 
+    file { $socket_dir:
+            ensure => directory,
+            owner  => 'root',
+            group  => 'root',
+            mode   => '0644';
+    } ->
     # include the fail2ban class to install fail2ban
     class { 'fail2ban':
         jails_config     => 'concat',
