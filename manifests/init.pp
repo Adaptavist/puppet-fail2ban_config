@@ -98,9 +98,8 @@ class fail2ban_config(
             owner  => 'root',
             group  => 'root',
             mode   => '0644';
-    } ->
     # include the fail2ban class to install fail2ban
-    class { 'fail2ban':
+    } -> class { 'fail2ban':
         jails_config     => 'concat',
         mailto           => $mailto,
         bantime          => $bantime,
